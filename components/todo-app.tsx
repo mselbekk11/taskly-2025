@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import {
   Inbox,
   Plus,
-  Trash2,
-  Layout,
+  // Trash2,
+  // Layout,
   MoreHorizontal,
   GripVertical,
 } from 'lucide-react';
