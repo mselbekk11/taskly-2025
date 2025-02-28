@@ -11,6 +11,15 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
   }).index("by_token", ["tokenIdentifier"]),
+  
+  tasks: defineTable({
+    title: v.string(),
+    description: v.string(),
+    completed: v.boolean(),
+    userId: v.string(),
+    createdAt: v.number(),
+  }).index("by_user", ["userId"]), // Index to quickly fetch tasks for a specific user
+  
   numbers: defineTable({
     value: v.number(),
   }),
