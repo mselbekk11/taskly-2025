@@ -44,3 +44,29 @@ export const getTasks = query({
     return tasks;
   },
 });
+
+export const deleteTask = mutation({
+  args: { id: v.id("tasks") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    
+    if (!identity) {
+      throw new Error("You must be logged in to delete tasks");
+    }
+
+    // Get the task to verify ownership
+    const task = await ctx.db.get(args.id);
+    
+    if (!task) {
+      throw new Error("Task not found");
+    }
+
+    // Verify the user owns this task
+    if (task.userId !== identity.subject) {
+      throw new Error("Unauthorized to delete this task");
+    }
+
+    // Delete the task
+    await ctx.db.delete(args.id);
+  },
+});

@@ -47,8 +47,9 @@ import {
 import { Input } from "@/components/ui/input";
 import EditTaskForm from "./edit-task-form";
 import { UserButton, useUser } from "@clerk/clerk-react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface Task {
   _id: string;
@@ -79,6 +80,8 @@ export default function TodoApp() {
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const { user } = useUser();
 
+  const deleteTaskMutation = useMutation(api.tasks.deleteTask);
+
   useEffect(() => {
     const savedProjects = localStorage.getItem("projects");
     setProjects(savedProjects ? JSON.parse(savedProjects) : []);
@@ -98,8 +101,8 @@ export default function TodoApp() {
     console.log("Need to implement toggle task mutation", id);
   };
 
-  const deleteTask = (id: string) => {
-    console.log("Need to implement delete task mutation", id);
+  const deleteTask = (id: Id<"tasks">) => {
+    deleteTaskMutation({ id });
   };
 
   const addProject = () => {
@@ -470,7 +473,9 @@ export default function TodoApp() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-red-600"
-                                onClick={() => deleteTask(task._id)}
+                                onClick={() =>
+                                  deleteTask(task._id as Id<"tasks">)
+                                }
                               >
                                 Delete
                               </DropdownMenuItem>
