@@ -81,6 +81,7 @@ export default function TodoApp() {
   const { user } = useUser();
 
   const deleteTaskMutation = useMutation(api.tasks.deleteTask);
+  const toggleTaskMutation = useMutation(api.tasks.toggleTask);
 
   useEffect(() => {
     const savedProjects = localStorage.getItem("projects");
@@ -97,8 +98,8 @@ export default function TodoApp() {
     setShowAddTaskModal(false);
   };
 
-  const toggleTask = (id: string) => {
-    console.log("Need to implement toggle task mutation", id);
+  const toggleTask = (id: Id<"tasks">) => {
+    toggleTaskMutation({ id });
   };
 
   const deleteTask = (id: Id<"tasks">) => {
@@ -406,7 +407,9 @@ export default function TodoApp() {
                             <input
                               type="checkbox"
                               checked={task.completed}
-                              onChange={() => toggleTask(task._id)}
+                              onChange={() =>
+                                toggleTask(task._id as Id<"tasks">)
+                              }
                               className="peer h-4 w-4 cursor-pointer appearance-none rounded-sm border border-gray-300 checked:border-red-500 checked:bg-red-500"
                             />
                             <svg
