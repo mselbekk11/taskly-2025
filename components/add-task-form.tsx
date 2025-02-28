@@ -11,9 +11,10 @@ import { api } from "@/convex/_generated/api";
 
 interface AddTaskFormProps {
   onCancel: () => void;
+  onSubmit: (task: { title: string; description: string }) => void;
 }
 
-export default function AddTaskForm({ onCancel }: AddTaskFormProps) {
+export default function AddTaskForm({ onCancel, onSubmit }: AddTaskFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -24,6 +25,7 @@ export default function AddTaskForm({ onCancel }: AddTaskFormProps) {
     if (!title.trim()) return;
     try {
       await addTask({ title: title.trim(), description: description.trim() });
+      onSubmit({ title: title.trim(), description: description.trim() });
       setTitle("");
       setDescription("");
       onCancel();

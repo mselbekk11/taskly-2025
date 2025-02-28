@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const addTask = mutation({
   args: {
@@ -25,5 +25,22 @@ export const addTask = mutation({
     });
 
     return taskId;
+  },
+});
+
+export const getTasks = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    
+    if (!identity) {
+      throw new Error("You must be logged in to get tasks");
+    }
+
+    const tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .collect();
+
+    return tasks;
   },
 });

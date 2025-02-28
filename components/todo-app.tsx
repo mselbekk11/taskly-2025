@@ -47,12 +47,16 @@ import {
 import { Input } from "@/components/ui/input";
 import EditTaskForm from "./edit-task-form";
 import { UserButton, useUser } from "@clerk/clerk-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 interface Task {
-  id: string;
+  _id: string;
+  _creationTime: number;
   title: string;
-  description?: string;
+  description: string;
   completed: boolean;
+  userId: string;
   projectId?: string;
 }
 
@@ -62,7 +66,7 @@ interface Project {
 }
 
 export default function TodoApp() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const tasks = useQuery(api.tasks.getTasks) || [];
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
@@ -75,69 +79,13 @@ export default function TodoApp() {
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const { user } = useUser();
 
-  // Load data from localStorage only once on client side
   useEffect(() => {
-    const savedTasks = localStorage.getItem("tasks");
     const savedProjects = localStorage.getItem("projects");
-
-    // Set tasks from localStorage or use default tasks if none exist
-    setTasks(
-      savedTasks
-        ? JSON.parse(savedTasks)
-        : [
-            {
-              id: "1",
-              title: "hello",
-              completed: false,
-            },
-            {
-              id: "2",
-              title: "does this work",
-              completed: false,
-            },
-            {
-              id: "3",
-              title: "Test",
-              completed: false,
-            },
-            {
-              id: "4",
-              title: "bppm",
-              completed: false,
-            },
-            {
-              id: "5",
-              title: "l32nf",
-              completed: false,
-            },
-            {
-              id: "6",
-              title: "lk2rng",
-              completed: false,
-            },
-          ],
-    );
-
-    // Set projects from localStorage or empty array if none exist
     setProjects(savedProjects ? JSON.parse(savedProjects) : []);
     setIsLoaded(true);
   }, []);
 
-  // Save tasks to localStorage whenever they change
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("tasks", JSON.stringify(tasks));
-    }
-  }, [tasks, isLoaded]);
-
-  // Save projects to localStorage whenever they change
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("projects", JSON.stringify(projects));
-    }
-  }, [projects, isLoaded]);
-
-  const filteredTasks = tasks.filter((task) =>
+  const filteredTasks = (tasks || []).filter((task) =>
     selectedProjectId ? task.projectId === selectedProjectId : !task.projectId,
   );
 
@@ -148,20 +96,15 @@ export default function TodoApp() {
       completed: false,
       projectId: selectedProjectId || undefined,
     };
-    setTasks((prevTasks) => [...prevTasks, newTask]);
-    setShowAddTaskModal(false);
+    console.log("Need to implement add task mutation");
   };
 
   const toggleTask = (id: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task,
-      ),
-    );
+    console.log("Need to implement toggle task mutation");
   };
 
   const deleteTask = (id: string) => {
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+    console.log("Need to implement delete task mutation");
   };
 
   const addProject = () => {
@@ -180,7 +123,7 @@ export default function TodoApp() {
   const deleteProject = (projectId: string) => {
     setProjects((prev) => prev.filter((p) => p.id !== projectId));
     // Also remove all tasks associated with this project
-    setTasks((prev) => prev.filter((t) => t.projectId !== projectId));
+    console.log("Need to implement delete project mutation");
     if (selectedProjectId === projectId) {
       setSelectedProjectId(null);
     }
@@ -226,10 +169,9 @@ export default function TodoApp() {
       selectedProjectId ? task.projectId !== selectedProjectId : task.projectId,
     );
 
-    setTasks([...newTasks, ...currentTasks]);
+    console.log("Need to implement update tasks mutation");
   };
 
-  // Optionally, you can prevent rendering until data is loaded
   if (!isLoaded) {
     return null; // or return a loading spinner
   }
@@ -403,17 +345,7 @@ export default function TodoApp() {
                     description: editingTask.description,
                   }}
                   onSubmit={(updatedTask) => {
-                    setTasks((prevTasks) =>
-                      prevTasks.map((task) =>
-                        task.id === editingTask.id
-                          ? {
-                              ...task,
-                              title: updatedTask.title,
-                              description: updatedTask.description,
-                            }
-                          : task,
-                      ),
-                    );
+                    console.log("Need to implement update task mutation");
                     setEditingTask(null);
                   }}
                   onCancel={() => setEditingTask(null)}
@@ -464,8 +396,8 @@ export default function TodoApp() {
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {filteredTasks.map((task, index) => (
                     <Draggable
-                      key={task.id}
-                      draggableId={task.id}
+                      key={task._id}
+                      draggableId={task._id}
                       index={index}
                     >
                       {(provided, snapshot) => (
@@ -487,7 +419,7 @@ export default function TodoApp() {
                             <input
                               type="checkbox"
                               checked={task.completed}
-                              onChange={() => toggleTask(task.id)}
+                              onChange={() => toggleTask(task._id)}
                               className="peer h-4 w-4 cursor-pointer appearance-none rounded-sm border border-gray-300 checked:border-red-500 checked:bg-red-500"
                             />
                             <svg
@@ -551,7 +483,7 @@ export default function TodoApp() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-red-600"
-                                onClick={() => deleteTask(task.id)}
+                                onClick={() => deleteTask(task._id)}
                               >
                                 Delete
                               </DropdownMenuItem>

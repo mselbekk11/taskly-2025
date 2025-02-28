@@ -17,6 +17,7 @@ export default defineSchema({
     description: v.string(),
     completed: v.boolean(),
     userId: v.string(),
+    projectId: v.optional(v.string()),
     createdAt: v.number(),
   }).index("by_user", ["userId"]), // Index to quickly fetch tasks for a specific user
   
