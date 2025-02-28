@@ -328,14 +328,11 @@ export default function TodoApp() {
               {editingTask && (
                 <EditTaskForm
                   task={{
+                    id: editingTask._id as Id<"tasks">,
                     title: editingTask.title,
                     description: editingTask.description,
                   }}
-                  onSubmit={(updatedTask) => {
-                    console.log(
-                      "Need to implement update task mutation",
-                      updatedTask,
-                    );
+                  onSubmit={() => {
                     setEditingTask(null);
                   }}
                   onCancel={() => setEditingTask(null)}

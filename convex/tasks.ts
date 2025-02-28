@@ -70,3 +70,36 @@ export const deleteTask = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+export const updateTask = mutation({
+  args: {
+    id: v.id("tasks"),
+    title: v.string(),
+    description: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    
+    if (!identity) {
+      throw new Error("You must be logged in to update tasks");
+    }
+
+    // Get the task to verify ownership
+    const task = await ctx.db.get(args.id);
+    
+    if (!task) {
+      throw new Error("Task not found");
+    }
+
+    // Verify the user owns this task
+    if (task.userId !== identity.subject) {
+      throw new Error("Unauthorized to update this task");
+    }
+
+    // Update the task
+    await ctx.db.patch(args.id, {
+      title: args.title,
+      description: args.description,
+    });
+  },
+});

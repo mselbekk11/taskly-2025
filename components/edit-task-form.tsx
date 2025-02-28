@@ -1,13 +1,17 @@
-'use client';
+"use client";
 
-import type React from 'react';
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface EditTaskFormProps {
   task: {
+    id: Id<"tasks">;
     title: string;
     description?: string;
   };
@@ -20,43 +24,51 @@ export default function EditTaskForm({
   onSubmit,
   onCancel,
 }: EditTaskFormProps) {
+  const updateTask = useMutation(api.tasks.updateTask);
   const [title, setTitle] = useState(task.title);
-  const [description, setDescription] = useState(task.description || '');
+  const [description, setDescription] = useState(task.description || "");
 
   // Update form when task changes
   useEffect(() => {
     setTitle(task.title);
-    setDescription(task.description || '');
+    setDescription(task.description || "");
   }, [task]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+
+    await updateTask({
+      id: task.id,
+      title: title.trim(),
+      description: description.trim() || "",
+    });
+
     onSubmit({ title: title.trim(), description: description.trim() });
   };
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
-      <div className='space-y-4'>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-4">
         <Input
-          placeholder='Task title'
+          placeholder="Task title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           autoFocus
-          className='focus-visible:ring-1'
+          className="focus-visible:ring-1"
         />
         <Textarea
-          placeholder='Description (optional)'
+          placeholder="Description (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
         />
       </div>
-      <div className='flex justify-end gap-2'>
-        <Button type='button' variant='ghost' onClick={onCancel}>
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type='submit'>Save Changes</Button>
+        <Button type="submit">Save Changes</Button>
       </div>
     </form>
   );
