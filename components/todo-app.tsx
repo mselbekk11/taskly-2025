@@ -9,7 +9,12 @@ import {
   MoreHorizontal,
   GripVertical,
 } from "lucide-react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -67,8 +72,6 @@ export default function TodoApp() {
     null,
   );
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [editTaskTitle, setEditTaskTitle] = useState("");
-  const [editTaskDescription, setEditTaskDescription] = useState("");
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const { user } = useUser();
 
@@ -197,7 +200,7 @@ export default function TodoApp() {
     return project?.name || "Inbox";
   };
 
-  const onDragEnd = (result: any) => {
+  const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
     const items = Array.from(tasks);
@@ -224,23 +227,6 @@ export default function TodoApp() {
     );
 
     setTasks([...newTasks, ...currentTasks]);
-  };
-
-  const handleEditTask = () => {
-    if (!editingTask) return;
-
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === editingTask.id
-          ? {
-              ...task,
-              title: editTaskTitle,
-              description: editTaskDescription,
-            }
-          : task,
-      ),
-    );
-    setEditingTask(null);
   };
 
   // Optionally, you can prevent rendering until data is loaded
@@ -349,9 +335,11 @@ export default function TodoApp() {
                 onChange={(e) => setNewProjectName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    editingProjectId
-                      ? editProject(editingProjectId, newProjectName)
-                      : addProject();
+                    if (editingProjectId) {
+                      editProject(editingProjectId, newProjectName);
+                    } else {
+                      addProject();
+                    }
                   }
                 }}
               />
@@ -369,9 +357,11 @@ export default function TodoApp() {
               </Button>
               <Button
                 onClick={() => {
-                  editingProjectId
-                    ? editProject(editingProjectId, newProjectName)
-                    : addProject();
+                  if (editingProjectId) {
+                    editProject(editingProjectId, newProjectName);
+                  } else {
+                    addProject();
+                  }
                 }}
               >
                 {editingProjectId ? "Save Changes" : "Add Project"}
@@ -517,8 +507,6 @@ export default function TodoApp() {
                             className="flex-1 flex items-center gap-2 cursor-pointer"
                             onClick={() => {
                               setEditingTask(task);
-                              setEditTaskTitle(task.title);
-                              setEditTaskDescription(task.description || "");
                             }}
                           >
                             <p
@@ -557,10 +545,6 @@ export default function TodoApp() {
                               <DropdownMenuItem
                                 onClick={() => {
                                   setEditingTask(task);
-                                  setEditTaskTitle(task.title);
-                                  setEditTaskDescription(
-                                    task.description || "",
-                                  );
                                 }}
                               >
                                 Edit
