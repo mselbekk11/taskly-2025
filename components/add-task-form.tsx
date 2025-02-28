@@ -7,17 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 interface AddTaskFormProps {
-  onSubmit: (task: { title: string; description?: string }) => void;
   onCancel: () => void;
 }
 
-export default function AddTaskForm({ onSubmit, onCancel }: AddTaskFormProps) {
+export default function AddTaskForm({ onCancel }: AddTaskFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const addTask = useMutation("tasks:addTask");
+  const addTask = useMutation(api.tasks.addTask);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
