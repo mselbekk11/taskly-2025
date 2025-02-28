@@ -89,22 +89,17 @@ export default function TodoApp() {
     selectedProjectId ? task.projectId === selectedProjectId : !task.projectId,
   );
 
-  const addTask = (task: Omit<Task, "id" | "completed" | "projectId">) => {
-    const newTask = {
-      ...task,
-      id: Math.random().toString(36).substring(7),
-      completed: false,
-      projectId: selectedProjectId || undefined,
-    };
-    console.log("Need to implement add task mutation");
+  const addTask = (task: { title: string; description: string }) => {
+    console.log("Need to implement add task mutation", task);
+    setShowAddTaskModal(false);
   };
 
   const toggleTask = (id: string) => {
-    console.log("Need to implement toggle task mutation");
+    console.log("Need to implement toggle task mutation", id);
   };
 
   const deleteTask = (id: string) => {
-    console.log("Need to implement delete task mutation");
+    console.log("Need to implement delete task mutation", id);
   };
 
   const addProject = () => {
@@ -150,24 +145,14 @@ export default function TodoApp() {
     const sourceIndex = result.source.index;
     const destinationIndex = result.destination.index;
 
-    // Get the tasks for the current view (either project tasks or inbox tasks)
     const currentTasks = items.filter((task) =>
       selectedProjectId
         ? task.projectId === selectedProjectId
         : !task.projectId,
     );
 
-    // Remove the dragged task from its position
     const [movedTask] = currentTasks.splice(sourceIndex, 1);
-
-    // Insert the task at the new position
     currentTasks.splice(destinationIndex, 0, movedTask);
-
-    // Update the full tasks array by replacing tasks for the current view
-    // while keeping other tasks unchanged
-    const newTasks = items.filter((task) =>
-      selectedProjectId ? task.projectId !== selectedProjectId : task.projectId,
-    );
 
     console.log("Need to implement update tasks mutation");
   };
@@ -321,7 +306,6 @@ export default function TodoApp() {
               <AddTaskForm
                 onSubmit={(task) => {
                   addTask(task);
-                  setShowAddTaskModal(false);
                 }}
                 onCancel={() => setShowAddTaskModal(false)}
               />
@@ -345,7 +329,10 @@ export default function TodoApp() {
                     description: editingTask.description,
                   }}
                   onSubmit={(updatedTask) => {
-                    console.log("Need to implement update task mutation");
+                    console.log(
+                      "Need to implement update task mutation",
+                      updatedTask,
+                    );
                     setEditingTask(null);
                   }}
                   onCancel={() => setEditingTask(null)}
