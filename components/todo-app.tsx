@@ -7,14 +7,8 @@ import {
   // Trash2,
   // Layout,
   MoreHorizontal,
-  GripVertical,
+  // GripVertical,
 } from "lucide-react";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -140,25 +134,6 @@ export default function TodoApp() {
     if (!selectedProjectId) return "Inbox";
     const project = projects.find((p) => p.id === selectedProjectId);
     return project?.name || "Inbox";
-  };
-
-  const onDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-
-    const items = Array.from(tasks);
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-
-    const currentTasks = items.filter((task) =>
-      selectedProjectId
-        ? task.projectId === selectedProjectId
-        : !task.projectId,
-    );
-
-    const [movedTask] = currentTasks.splice(sourceIndex, 1);
-    currentTasks.splice(destinationIndex, 0, movedTask);
-
-    console.log("Need to implement update tasks mutation");
   };
 
   if (!isLoaded) {
@@ -378,118 +353,89 @@ export default function TodoApp() {
               </DropdownMenu>
             )}
           </div>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId={selectedProjectId || "inbox"}>
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {filteredTasks.map((task, index) => (
-                    <Draggable
-                      key={task._id}
-                      draggableId={task._id}
-                      index={index}
-                    >
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className={cn(
-                            "flex gap-3 py-2 px-4 items-center border-b hover:bg-[#27272a80]",
-                            snapshot.isDragging && "bg-accent",
-                          )}
-                        >
-                          <div
-                            {...provided.dragHandleProps}
-                            className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing"
-                          >
-                            <GripVertical className="h-4 w-4" />
-                          </div>
-                          <div className="relative flex h-4 w-4 items-center justify-center">
-                            <input
-                              type="checkbox"
-                              checked={task.completed}
-                              onChange={() =>
-                                toggleTask(task._id as Id<"tasks">)
-                              }
-                              className="peer h-4 w-4 cursor-pointer appearance-none rounded-sm border border-gray-300 checked:border-red-500 checked:bg-red-500"
-                            />
-                            <svg
-                              className="pointer-events-none absolute hidden h-2.5 w-2.5 text-white peer-checked:block"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                          </div>
-                          <div
-                            className="flex-1 flex items-center gap-2 cursor-pointer"
-                            onClick={() => {
-                              setEditingTask(task);
-                            }}
-                          >
-                            <p
-                              className={cn(
-                                "font-medium",
-                                task.completed && "line-through",
-                              )}
-                            >
-                              {task.title}
-                            </p>
-                            {task.description && (
-                              <>
-                                <span className="text-zinc-600 dark:text-zinc-500">
-                                  |
-                                </span>
-                                <p className="text-sm text-zinc-500 dark:text-zinc-600 truncate max-w-[400px]">
-                                  {task.description.length > 100
-                                    ? task.description.substring(0, 100) + "..."
-                                    : task.description}
-                                </p>
-                              </>
-                            )}
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Open menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setEditingTask(task);
-                                }}
-                              >
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-red-600"
-                                onClick={() =>
-                                  deleteTask(task._id as Id<"tasks">)
-                                }
-                              >
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
+          <div>
+            {filteredTasks.map((task) => (
+              <div
+                key={task._id}
+                className="flex gap-3 py-2 px-4 items-center border-b hover:bg-[#27272a80]"
+              >
+                <div className="relative flex h-4 w-4 items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => toggleTask(task._id as Id<"tasks">)}
+                    className="peer h-4 w-4 cursor-pointer appearance-none rounded-sm border border-gray-300 checked:border-red-500 checked:bg-red-500"
+                  />
+                  <svg
+                    className="pointer-events-none absolute hidden h-2.5 w-2.5 text-white peer-checked:block"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
                 </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+                <div
+                  className="flex-1 flex items-center gap-2 cursor-pointer"
+                  onClick={() => {
+                    setEditingTask(task);
+                  }}
+                >
+                  <p
+                    className={cn(
+                      "font-medium",
+                      task.completed && "line-through",
+                    )}
+                  >
+                    {task.title}
+                  </p>
+                  {task.description && (
+                    <>
+                      <span className="text-zinc-600 dark:text-zinc-500">
+                        |
+                      </span>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-600 truncate max-w-[400px]">
+                        {task.description.length > 100
+                          ? task.description.substring(0, 100) + "..."
+                          : task.description}
+                      </p>
+                    </>
+                  )}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setEditingTask(task);
+                      }}
+                    >
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() => deleteTask(task._id as Id<"tasks">)}
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ))}
+          </div>
 
           <div
             onClick={() => setShowAddTaskModal(true)}
