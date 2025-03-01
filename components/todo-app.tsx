@@ -145,7 +145,7 @@ export default function TodoApp() {
       <div className="flex h-screen w-full bg-background dark:bg-zinc-950">
         <Sidebar className="flex-shrink-0">
           <SidebarHeader className="border-b p-4">
-            <div className="text-xl font-bold text-red-500">Taskly.</div>
+            <div className="text-xl font-bold text-red-500">Taskly</div>
           </SidebarHeader>
           <SidebarContent className="flex flex-col h-[calc(100vh-65px)]">
             <div className="flex-1">
